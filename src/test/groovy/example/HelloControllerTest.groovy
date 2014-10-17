@@ -6,10 +6,10 @@ class HelloControllerTest extends Specification {
 
 	HelloController helloController = new HelloController()
 	
-	void "Return a greeting when called"() {
+	def "Return a greeting when called"() {
 		when: def greeting = helloController.index()
 		then:
-		greeting
+		greeting 
 	}
 
 }

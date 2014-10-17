@@ -10,8 +10,11 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
+apply plugin: 'application'
 
 version = 1.0
+description = 'Little Spring Boot project to play around.'
+buildDir = 'target'
 
 repositories {
     mavenCentral()
@@ -39,4 +42,32 @@ processResources {
 	expand(project.properties)
 }
 
+test {
+	include "**/*Test*"
+	reports.html.enabled = false
+	afterTest { desc, result ->
+		println "Executing '${desc.name}' [${desc.className}] with result: ${result.resultType}"
+	}
+}
 
+task componentTests(type: Test, dependsOn: test) {
+	include "**/*CT*"
+	reports.html.enabled = false
+	afterTest { desc, result -> 
+        println "Executing '${desc.name}' [${desc.className}] with result: ${result.resultType}"
+    }
+}
+
+task allTests(type: TestReport, dependsOn: ['test', 'componentTests']) {
+	doFirst {
+		gradle.startParameter.continueOnFailure = true
+	}
+	destinationDir = file("$buildDir/reports/allTests")
+	tasks.withType(Test) {
+		reportOn it
+	}
+}
+
+check {
+	dependsOn = ['test', 'componentTests', 'allTests']
+}
