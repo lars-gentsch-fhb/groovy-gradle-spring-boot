@@ -1,73 +1,94 @@
 buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE")
-	}
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath('org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE')
+        classpath ('com.sahlbach.gradle:gradle-jetty-eclipse-plugin:1.9.+')
+    }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
-apply plugin: 'application'
+apply plugin: 'war'
+apply plugin: 'jettyEclipse'
+
+configurations { providedRuntime }
 
 version = 1.0
 description = 'Little Spring Boot project to play around.'
 buildDir = 'target'
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
+
+processResources { expand(project.properties) }
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.6'
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-    compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') {
-        exclude module: 'spring-boot-starter-tomcat'
+    compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') { 
+        exclude module: 'spring-boot-starter-tomcat' 
     }
     compile('org.springframework.boot:spring-boot-starter-jetty:1.1.8.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-actuator:1.1.8.RELEASE')
+    providedRuntime("org.springframework.boot:spring-boot-starter-jetty")
 
     testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
     testCompile 'junit:junit:4.11'
 }
 
 jar {
-    baseName = 'gs-spring-boot'
-    version =  '0.1.0'
+    baseName = this.name
+    version =  this.version
 }
 
-processResources {
-	expand(project.properties)
+war {
+    baseName = this.name
+    version = this.version
 }
 
 test {
-	include "**/*Test*"
-	reports.html.enabled = false
-	afterTest { desc, result ->
-		println "Executing '${desc.name}' [${desc.className}] with result: ${result.resultType}"
-	}
+    include "**/*Test*"
+    reports.html.enabled = false
+    afterTest { desc, result ->
+        println "Executing '${desc.name}' [${desc.className}] with result: ${result.resultType}"
+    }
 }
 
 task componentTests(type: Test, dependsOn: test) {
-	include "**/*CT*"
-	reports.html.enabled = false
-	afterTest { desc, result -> 
+    include "**/*CT*"
+    reports.html.enabled = false
+    afterTest { desc, result ->
         println "Executing '${desc.name}' [${desc.className}] with result: ${result.resultType}"
     }
 }
 
 task allTests(type: TestReport, dependsOn: ['test', 'componentTests']) {
-	doFirst {
-		gradle.startParameter.continueOnFailure = true
-	}
-	destinationDir = file("$buildDir/reports/allTests")
-	tasks.withType(Test) {
-		reportOn it
-	}
+    doFirst {
+        gradle.startParameter.continueOnFailure = true
+    }
+    destinationDir = file("$buildDir/reports/allTests")
+    tasks.withType(Test) { reportOn it }
 }
 
 check {
-	dependsOn = ['test', 'componentTests', 'allTests']
+    dependsOn = [
+        'test',
+        'componentTests',
+        'allTests'
+    ]
+}
+
+componentTests.doFirst {
+    println 'Starting app ...'
+    tasks.jettyEclipseRun.daemon=true
+    tasks.jettyEclipseRun.execute()
+}
+
+componentTests.doLast {
+    println 'Stopping app.'
+    tasks.jettyEclipseRun.execute()
 }
