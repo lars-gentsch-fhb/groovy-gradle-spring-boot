@@ -9,6 +9,6 @@ class HelloController {
 
     @RequestMapping(value="/", method=RequestMethod.GET)
     String index() {
-        return "hello"
+        return [hello: 'json', an: [other: 'object']]
     }
 }
