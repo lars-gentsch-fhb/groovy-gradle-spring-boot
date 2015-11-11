@@ -26,17 +26,17 @@ repositories { mavenCentral() }
 processResources { expand(project.properties) }
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.3.6'
+    compile 'org.codehaus.groovy:groovy-all:2.4.4'
 
-    compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') { 
+    compile('org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE') {
         exclude module: 'spring-boot-starter-tomcat' 
     }
-    compile('org.springframework.boot:spring-boot-starter-jetty:1.1.8.RELEASE')
-    compile('org.springframework.boot:spring-boot-starter-actuator:1.1.8.RELEASE')
-    providedRuntime("org.springframework.boot:spring-boot-starter-jetty:1.1.8.RELEASE")
+    compile('org.springframework.boot:spring-boot-starter-jetty:1.2.7.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-actuator:1.2.7.RELEASE')
+    providedRuntime("org.springframework.boot:spring-boot-starter-jetty:1.2.7.RELEASE")
 
-    testCompile 'org.spockframework:spock-core:0.7-groovy-2.0'
-    testCompile 'junit:junit:4.11'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'junit:junit:4.12'
 }
 
 jar {
